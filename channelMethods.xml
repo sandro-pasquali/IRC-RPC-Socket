@@ -1,0 +1,398 @@
+<?xml version="1.0"?>
+<functions>
+
+   <func name="allBuddies">
+      <parameters>
+	    <param key="sentUsername" type="string" />
+      </parameters>
+      <code>
+         <![CDATA[
+
+/*************************************************************
+ * channelMethods.xml :: allBuddies
+ *
+ * Returns a buddy list for a specified user  
+ *
+ * Sandro Pasquali (sandropasquali@yahoo.com)
+ * 15.03.2004
+ *
+ * ACCEPTS: String sentUsername * a valid username
+ *
+ * RETURNS: 
+ * array(
+ *   struct(
+ *					 
+ *	  'displayName' - String
+ *						
+ *	  'ircChannel' - String - default ""
+ *					 
+ *	  'currentChannel' - String - default ""
+ *
+ *    'buddyType' - String - default ""
+ *					 
+ *	  'status' - String
+ *
+ * HISTORY:
+ *		 
+ *************************************************************/		
+  
+           // get userid for this username
+		   $result = mysql_query("select user_id from user_misc where username = '$sentUsername'");
+		   $uID = mysql_fetch_array($result);
+		   $uID = $uID[0];
+		   
+	       // now get a buddy list array
+		   $q = "select t2.username
+                 from dc_datebook as t1, user_misc as t2
+                 where (t2.user_id = t1.buddy_id) and t1.user_id = $uID";
+ 
+		   $result = mysql_query($q);
+		   
+		   $bList = array();
+		   $cnt = 0;
+		   
+		   
+		   if($result && (mysql_num_rows($result) > 0))
+		     {
+			   // for each buddy in list, check if online
+		       while(list($buddyDisplayName) = mysql_fetch_array($result)) 
+		         {
+			       $bList[$cnt] = array();
+				   
+			       /*  displayName
+			        *
+			        * nickname in chat
+				    */
+			       $bList[$cnt]['displayName'] = $buddyDisplayName;
+
+				   $q = "SELECT channel 
+				         FROM chan, ison, user 
+						 WHERE chan.chanid = ison.chanid 
+						   AND ison.nickid = user.nickid 
+						   AND (user.nick='".$buddyDisplayName."' OR user.nick='".$buddyDisplayName."_') 
+						 LIMIT 0,1";
+						 
+				   $isonline = mysql_query($q);
+				   $ircChannel = "";
+				   $currentChannel = "";
+				   
+	               if($isonline && (mysql_num_rows($isonline) > 0)) 
+				     {
+		               $row = mysql_fetch_row($isonline);
+					   
+			           /*  ircChannel
+			            *
+			            * raw channel name, ie. #triviaroom1
+				        */
+			           $bList[$cnt]['ircChannel'] = $row[0];
+					   
+			           /*  currentChannel
+			            *
+			            * formatted room name, ie. "TriviaRoom 1"
+				        */
+			           $bList[$cnt]['currentChannel'] = _getRoomName($row[0]);
+					   
+		               mysql_free_result($isonline);
+	                 }		
+					 
+			   
+			       /*  displayName
+			        *
+			        * unused
+				    */
+			       $bList[$cnt]['buddyType'] = "";
+				   
+			       /*  displayName
+			        *
+			        * unused
+				    */
+			       $bList[$cnt]['status'] = "";
+			   
+			       ++$cnt;
+			     }
+		       mysql_free_result($result);
+               return($bList);
+             }
+           else
+		     {
+			   return(false);
+			 }
+		   
+             ]]>
+      </code>
+   </func>   
+
+  <func name="allChannels">
+      <parameters>
+      </parameters>
+      <code>
+         <![CDATA[
+
+/*************************************************************
+ * channelMethods.xml :: allChannels
+ *
+ * Returns a list of all public channels
+ *
+ * Sandro Pasquali (sandropasquali@yahoo.com)
+ * 15.03.2004
+ *
+ * ACCEPTS: 
+ *
+ * RETURNS: 
+ * array(
+ *   struct(
+ *    'chanType' - String - default ""
+ *					 
+ *	  'ircChannel' - String
+ *					 
+ *	  'displayName' - String
+ *					 
+ *	  'numberOfUsers' - Int
+ *						
+ *	  'accessLevel' - String - default ""
+ *
+ *	  'network' - String - default ""
+ *
+ *	  'videoMode' - String - default "Unlimited"
+ *
+ *	  'timeLeft' - Int 
+ *
+ *	  'signupPage' - String - default ""
+ *
+ *	  'rebillPage' - String - default ""
+ *
+ *	  'networkInfo' - String - default ""
+ *
+ *	  'channelInfo' - String - default ""
+ *
+ *	  'priceInfo' - String - default ""
+ *
+ *	  'networkLogo' - String - default ""
+ *
+ * HISTORY:
+ *		 
+ *************************************************************/		
+		 
+		   // holds all the channel objects
+		   $chans = array();
+		 
+           $result = mysql_query("select DISTINCT(channel) from chan");
+		   
+		   $cnt = 0;
+		   
+		   if($result && mysql_num_rows($result)>0)
+		     {
+		       while ($ch = mysql_fetch_array($result)) 
+		         {
+			       // if this is not a public room, skip
+			       if(!_isValidRoom($ch[0])) { continue; }
+			   
+			       $numUserQuery = "SELECT COUNT(t2.nickid) 
+			                        FROM chan AS t1, ison AS t2 
+					                WHERE t1.channel = '".$ch[0]."'
+                                    AND t1.chanid=t2.chanid";
+								
+			       // get the count value, which will be $numUsers[0]
+			       $numUsers = mysql_fetch_array(mysql_query($numUserQuery));
+
+                   $chans[$cnt] = array();
+			   
+			       /* chanType
+			        *
+			        * channel type, currently unused. may be used to 
+                    * differentiate adult content from non-adult???
+				    */
+			       $chans[$cnt]['chanType'] = '';
+			   
+			       /* ircChannel
+			        *
+			        * raw channel name, ie. #triviaroom1
+				    */
+			       $chans[$cnt]['ircChannel'] = $ch[0];
+
+			       /* displayName
+			        *
+			        * formatted room name, ie. "TriviaRoom 1"
+				    */
+			       $chans[$cnt]['displayName'] = _getRoomName($ch[0]);
+			   
+			       /* numberOfUsers
+			        *
+			        * current number of users in room
+				    */
+			       $chans[$cnt]['numberOfUsers'] = (int)$numUsers[0];
+
+			       /* accessLevel
+			        *
+			        * access level required for room admission
+				    */
+			       $chans[$cnt]['accessLevel'] = '';
+			   
+			       /* network
+			        *
+			        * network which hosts room
+				    */
+			       $chans[$cnt]['network'] = '';
+			   
+			       /* videoMode
+			        *
+			        * "None" : No video broadcast OR reception
+				    * "Crippled" : Video (one frame/sec, no sound)
+				    * "Unlimited" : full broadcast/reception
+				    * "PPM" : pay per minute access, full broadcasting
+				    * "PPPM" : pay per private minute access, no broadcasting
+				    */
+			       $chans[$cnt]['videoMode'] = 'Unlimited';
+			   
+			       /* timeLeft
+			        *
+			        * number of remaining seconds for session, if applicable
+				    */
+			       $chans[$cnt]['timeLeft'] = 0;
+			   
+			       /* signupPage
+			        *
+			        * network content subscription page, sent as
+				    * url with username, ie:
+				    * http://www.datecam.com/signup.php?username=nataxia
+				    */
+			       $chans[$cnt]['signupPage'] = '';
+			   
+			       /* rebillPage
+			        *
+			        * network content REsubscription page, sent as
+				    * url with username, ie:
+				    * http://www.datecam.com/resignup.php?username=nataxia
+			 	    */
+			       $chans[$cnt]['rebillPage'] = '';
+			   
+			       /* networkInfo
+			        *
+			        * text information about current network
+				    */
+			       $chans[$cnt]['networkInfo'] = '';
+			   
+			       /* channelInfo
+			        *
+			        * text information about current channel
+				    */
+			       $chans[$cnt]['channelInfo'] = '';
+			   
+			       /* priceInfo
+			        *
+			        * text information about cost for access
+				    */
+			       $chans[$cnt]['priceInfo'] = '';
+			   
+			       /* networkLogo
+			        *
+			        * url for graphic of network content logo, ie:
+				    * http://www.datecam.com/logos/channelLogo.jpg
+				    */
+			       $chans[$cnt]['networkLogo'] = '';
+			   
+			       ++$cnt;
+			     }
+			   mysql_free_result($result);
+			   return($chans);
+		     }
+		   else
+		     {
+			   return(false);
+			 }
+            
+             ]]>
+      </code>
+   </func>
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   <func name="getChannelNames">
+      <parameters>
+      </parameters>
+      <code>
+         <![CDATA[
+
+		   // holds all the channel objects
+		   $chans = array();
+		 
+           $result = mysql_query("select DISTINCT(channel) from chan");
+		   
+		   while ($ch = mysql_fetch_array($result)) 
+		     {
+			   $chans[] = $ch[0];
+	         }
+			 
+           return($chans);
+            
+             ]]>
+      </code>
+   </func>
+   
+   <func name="getChannelUsers">
+      <parameters>
+	    <param key="singleChannel" type="string" default="" />
+      </parameters>
+      <code>
+         <![CDATA[
+
+		   // fetch relevant channel/channels
+		   if($singleChannel == "")
+		     {
+			   $q = "select DISTINCT(chanid),channel from chan";
+			 }
+		   else
+		     {
+			   $q = "select DISTINCT(chanid),channel from chan WHERE channel = '$singleChannel'";
+			 }
+
+           $result = mysql_query($q);
+		   
+		   $retArr = array(); // will become the array which gets returned
+		   
+		   $cnt = 0;
+		   while(list($id,$cnm) = mysql_fetch_array($result)) 
+		     {
+     		   $retArr[$cnt]['name'] = $cnm;
+			   $retArr[$cnt]['users'] = array();
+			   
+			   $q = "SELECT t1.nick 
+			         FROM user AS t1, ison AS t2 
+					 WHERE t2.chanid = $id
+                     AND t1.nickid=t2.nickid";
+					 
+               $result2 = mysql_query($q);
+
+		       while($usrNm = mysql_fetch_array($result2)) 
+		         {
+			       $retArr[$cnt]['users'][] = $usrNm[0];
+			     }
+			   ++$cnt;
+	         }
+			 
+		   mysql_free_result($result);
+		   mysql_free_result($result2);
+		   
+           return($retArr);
+
+             ]]>
+      </code>
+   </func>
+
+</functions>
+

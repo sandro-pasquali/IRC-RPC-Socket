@@ -1,0 +1,38 @@
+<div id="menuContainer" styleSheet="menu.css" iconSet="testIcons.xml">
+
+   <div class="rootElement">
+       <div onclick="MenuRef.activate(this)" state="closed">ROOT A</div>
+      <div class="subElement">
+         <div onclick="MenuRef.activate(this)" state="closed">SUBLEVEL</div>
+         <div class="element">Element</div>
+         <div class="element">Element</div>
+         <div class="subElement">
+            <div onclick="MenuRef.activate(this)" state="closed">SUBLEVEL</div>
+            <div class="element">Element</div>
+            <div class="element">Element</div>
+            <div class="element">Element</div>
+            <div class="element">ddd</div>
+         </div>
+      </div>
+   </div>
+   
+   <div class="rootElement">
+       <div onclick="MenuRef.activate(this)" state="closed">ROOT A</div>
+      <div class="subElement">
+         <div onclick="MenuRef.activate(this)" state="closed">SUBLEVEL</div>
+         <div class="element">Element</div>
+         <div class="element">Element</div>
+         <div class="subElement">
+            <div onclick="MenuRef.activate(this)" state="closed">SUBLEVEL</div>
+            <div class="element">Element</div>
+            <div class="element">Element</div>
+            <div class="element">Element</div>
+            <div class="element">ddd</div>
+         </div>
+      </div>
+   </div>
+   
+</div>
+
+
+

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<functions>
+   <func name="testRPC">
+      <parameters>
+         <param key="integerParam" type="int" />
+         <param key="integerParamDefault" type="string" default="defaultOK" />
+      </parameters>
+      <code>
+         <![CDATA[
+
+		   //$ret[0] = "integerParam: ".$integerParam;
+		   //$ret[1] = "integerParamDefault: ".$integerParamDefault;
+           return('sandro');
+            
+             ]]>
+      </code>
+   </func>
+</functions>
+

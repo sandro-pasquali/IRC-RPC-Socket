@@ -1,0 +1,6 @@
+<IconSet id="theSetId">
+
+<icon id="closed" location="images/" fileName="closed" extension="gif" />
+<icon id="open" location="images/" fileName="open" extension="gif" />
+
+</IconSet>

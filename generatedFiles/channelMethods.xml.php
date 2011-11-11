@@ -1,0 +1,30 @@
+<?php
+/**
+* allChannels.
+*
+* @example /usr/local/apache/htdocs/sandro/sockets/generatedFiles/channelMethods.xml.rpcExamples.html
+*/
+function allChannels() {
+    global $System;$_argv = func_get_arg(0);$_slot = array_shift($_argv);/************************************************************* * channelMethods.xml :: allChannels * * Returns a list of all public channels as structs containing * various pieces of information on channel and use of channel * * Sandro Pasquali (sandropasquali@yahoo.com) * 15.03.2004 * * ACCEPTS: * * RETURNS: * array( * struct( * 'chanType' - String - default "" * * 'ircChannel' - String * * 'displayName' - String * * 'numberOfUsers' - Int * * 'accessLevel' - String - default "" * * 'network' - String - default "" * * 'videoMode' - String - default "Unlimited" * * 'timeLeft' - Int * * 'signupPage' - String - default "" * * 'rebillPage' - String - default "" * * 'networkInfo' - String - default "" * * 'channelInfo' - String - default "" * * 'priceInfo' - String - default "" * * 'networkLogo' - String - default "" * * HISTORY: * *************************************************************/ /* * holds all the channel objects */ $chans = array(); $result = mysql_query("select DISTINCT(channel) from chan",$System->Dbase->readID); $cnt = 0; if($result &amp;&amp; mysql_num_rows($result)>0) { while($ch = mysql_fetch_array($result)) { /* * if this is not a public room, skip */ if(!$System->Rooms->isValidRoom($ch[0])) { continue; } $numUserQuery = "SELECT COUNT(t2.nickid) FROM chan AS t1, ison AS t2 WHERE t1.channel = '".$ch[0]."' AND t1.chanid=t2.chanid"; /* * get the count value, which will be $numUsers[0] */ $numUsers = mysql_fetch_array(mysql_query($numUserQuery,$System->Dbase->readID)); $chans[$cnt] = array(); /* chanType * * channel type, currently unused. may be used to * differentiate adult content from non-adult??? */ $chans[$cnt]['chanType'] = ''; /* ircChannel * * raw channel name, ie. #triviaroom1 */ $chans[$cnt]['ircChannel'] = $ch[0]; /* displayName * * formatted room name, ie. "TriviaRoom 1" */ $chans[$cnt]['displayName'] = $System->Rooms->getRoomName($ch[0]); /* numberOfUsers * * current number of users in room */ $chans[$cnt]['numberOfUsers'] = (int)$numUsers[0]; /* accessLevel * * access level required for room admission */ $chans[$cnt]['accessLevel'] = ''; /* network * * network which hosts room */ $chans[$cnt]['network'] = ''; /* videoMode * * "None" : No video broadcast OR reception * "Crippled" : Video (one frame/sec, no sound) * "Unlimited" : full broadcast/reception * "PPM" : pay per minute access, full broadcasting * "PPPM" : pay per private minute access, no broadcasting */ $chans[$cnt]['videoMode'] = 'Unlimited'; /* timeLeft * * number of remaining seconds for session, if applicable */ $chans[$cnt]['timeLeft'] = 0; /* signupPage * * network content subscription page, sent as * url with username, ie: * http://www.datecam.com/signup.php?username=sandro */ $chans[$cnt]['signupPage'] = ''; /* rebillPage * * network content REsubscription page, sent as * url with username, ie: * http://www.datecam.com/resignup.php?username=sandro */ $chans[$cnt]['rebillPage'] = ''; /* networkInfo * * text information about current network */ $chans[$cnt]['networkInfo'] = ''; /* channelInfo * * text information about current channel */ $chans[$cnt]['channelInfo'] = ''; /* priceInfo * * text information about cost for access */ $chans[$cnt]['priceInfo'] = ''; /* networkLogo * * url for graphic of network content logo, ie: * http://www.datecam.com/logos/channelLogo.jpg */ $chans[$cnt]['networkLogo'] = ''; ++$cnt; } mysql_free_result($result); return($chans); } else { return(false); }
+  }
+
+/**
+* getChannelNames.
+*
+* @example /usr/local/apache/htdocs/sandro/sockets/generatedFiles/channelMethods.xml.rpcExamples.html
+*/
+function getChannelNames() {
+    global $System;$_argv = func_get_arg(0);$_slot = array_shift($_argv);/* * holds all the channel objects */ $chans = array(); /* * select all registered channels and store them */ $result = mysql_query("select DISTINCT(channel) from chan",$System->Dbase->readID); while ($ch = mysql_fetch_array($result)) { $chans[] = $ch[0]; } return($chans);
+  }
+
+/**
+* getChannelUsers.
+*
+* @param     $singleChannel 		(string)	Default:(string)""
+* @example /usr/local/apache/htdocs/sandro/sockets/generatedFiles/channelMethods.xml.rpcExamples.html
+*/
+function getChannelUsers() {
+    global $System;$_argv = func_get_arg(0);$_slot = array_shift($_argv);$singleChannel= (isset($_argv[0])) ? $_argv[0] : (string)"";if(is_string($singleChannel)==false) { return(false); }/* * fetch relevant channel/channels */ if($singleChannel == "") { $q = "select DISTINCT(chanid),channel from chan"; } else { $q = "select DISTINCT(chanid),channel from chan WHERE channel = '$singleChannel'"; } $allChannels = mysql_query($q,$System->Dbase->readID); /* * will become the array which gets returned */ $retArr = array(); if($allChannels) { $cnt = 0; while(list($id,$cnm) = mysql_fetch_array($allChannels)) { /* only store valid(public) rooms information; * skip if not a valid room */ if(!$System->Rooms->isValidRoom($cnm)) { continue; } /* ircChannel * * raw channel name, ie. #triviaroom1 */ $retArr[$cnt]['ircChannel'] = $cnm; /* displayName * * formatted room name, ie. "TriviaRoom 1" */ $retArr[$cnt]['displayName'] = $System->Rooms->getRoomName($cnm); /* users * * an array containing irc nick of all users in room */ $retArr[$cnt]['users'] = array(); $q = "SELECT t1.nick FROM user AS t1, ison AS t2 WHERE t2.chanid = $id AND t1.nickid=t2.nickid"; $allUsers = mysql_query($q,$System->Dbase->readID); if($allUsers) { while($usrNm = mysql_fetch_array($allUsers)) { $retArr[$cnt]['users'][] = $usrNm[0]; } mysql_free_result($allUsers); } else { return(false); } ++$cnt; } mysql_free_result($allChannels); return($retArr); } else { return(false); }
+  }
+
+?>

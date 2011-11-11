@@ -1,0 +1,13 @@
+<IconSet id="theSetId">
+
+<icon id="invoices" location="images/" fileName="invoices" extension="gif" />
+<icon id="sales_reps" location="images/" fileName="sales_reps" extension="gif" />
+<icon id="clients" location="images/" fileName="clients" extension="gif" />
+<icon id="surveys" location="images/" fileName="surveys" extension="gif" />
+<icon id="competition" location="images/" fileName="competition" extension="gif" />
+<icon id="reports" location="images/" fileName="reports" extension="gif" />
+
+<icon id="closed" location="images/" fileName="closed" extension="gif" />
+<icon id="open" location="images/" fileName="open" extension="gif" />
+
+</IconSet>

@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<functions>
+   <func name="testRPC">
+      <parameters>
+         <param key="integerParam" type="int" />
+         <param key="integerParamDefault" type="string" default="defaultOK" />
+      </parameters>
+      <code>
+         <![CDATA[
+
+		   /* $ret[0] = "integerParam: ".$integerParam;
+		    * $ret[1] = "integerParamDefault: ".$integerParamDefault;
+			*/
+           return('sandro');
+            
+             ]]>
+      </code>
+   </func>
+   
+   <func name="testArray">
+      <parameters>
+         <param key="fore" type="dateTime.iso8601" />
+         <param key="ar" type="array" />
+         <param key="aft" />
+      </parameters>
+      <code>
+         <![CDATA[
+
+           return(array($fore,$ar,$aft));
+		   
+             ]]>
+      </code>
+   </func>
+   
+   <func name="testStruct">
+      <parameters>
+         <param key="ar" type="array" />
+      </parameters>
+      <code>
+         <![CDATA[
+
+           return($ar);
+            
+             ]]>
+      </code>
+   </func>
+   
+</functions>
+

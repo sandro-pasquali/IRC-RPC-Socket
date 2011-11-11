@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<functions>
+   <func name="getUserKey">
+      <parameters>
+         <param key="slot" type="int" />
+         <param key="username" />
+      </parameters>
+      <code>
+         <![CDATA[
+            
+             if(isset($slot) && $_->clients[$slot]['level'] == 0)
+               {
+                 // parse the methodCall 
+                 $xmlrpc_request = XMLRPC_parse($username);
+                 $params = XMLRPC_getParams($xmlrpc_request);
+				 
+                 if(is_array($params) && isset($params[0]))
+                   {
+     			     // store username
+		    	     $_->clients[$slot]['username'] = $params[0];
+				 
+                     // send challenge as RPC packet
+		             $challenge = array('challenge',array($_->getChallenge($slot)));
+		             $_->sendData($slot,XMLRPC_methodResponse($challenge)); 			   
+				   }
+               }  
+             else // fault
+               {
+                 return(false);
+               } 
+            
+             ]]>
+      </code>
+   </func>
+   <func name="checkPassword">
+      <parameters>
+         <param key="slot" type="int" />
+         <param key="challenge" />
+      </parameters>
+      <code>
+         <![CDATA[
+
+             if(isset($slot) && $_->clients[$slot]['level'] == 0)
+               {
+                 // parse the methodCall 
+                 $xmlrpc_request = XMLRPC_parse($challenge);
+                 $params = XMLRPC_getParams($xmlrpc_request);
+				 
+                 if(is_array($params) && isset($params[0]))
+                   {
+                     $result = mysql_query("select password from user_accounts WHERE username = '".$_->clients[$slot]['username']."'");
+
+                     if(mysql_num_rows($result) > 0) // is there a password for this username?
+					   {
+					     // password will be $creds[0] 
+					     $creds = mysql_fetch_array($result);
+
+                         $response = $params[0]; /* assume first field is challenge response */
+						 
+                         if(sha1($_->getChallenge($slot).$creds[0]) == $response)
+                           {
+                             // get user info and set level 
+                             $_->setUserLevel($slot,1);
+                     
+                             // set session lifespan 
+                             $_->setLifespan($slot,"session");
+                         
+                             // attach methodcall name 
+                             $aResp = array('authenticate',array('authOK'));
+                         
+                             // send response 
+                             return($_->sendData($slot,XMLRPC_methodResponse($aResp)));
+						   }
+                       }
+                     mysql_free_result($result);
+                   }
+                 /* if no parameters set, or authentication fails
+                  * send bad login.  
+                  */
+                 $aResp = array('authenticate',array('authFAIL'));
+                 return($_->sendData($slot,XMLRPC_methodResponse($aResp)));      
+               }
+             else // fault
+               {
+                 return(false);
+               } 
+            
+             ]]>
+      </code>
+   </func>
+</functions>
+

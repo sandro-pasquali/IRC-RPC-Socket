@@ -1,0 +1,70 @@
+.methodCollection 
+  {
+	/* optional */
+	font-family: Verdana, Arial;
+	font-size: 12px;
+	font-weight: bold;
+	cursor: default;
+	color: midnightBlue;
+	background-color: #f0f0f0;
+	border: 1px #a9a9a9 solid;
+	padding: 4px;
+  }
+
+.methodName
+  {
+    color: #ff0000;
+  }  
+  
+.methodCall  
+  {
+	/* obligatory */
+	position: absolute;
+	visibility: hidden;
+		
+	/* optional */
+	padding-left: 4px;
+	color: indigo;
+	background-color: #f9f9f9;
+	border: 1px #a9a9a9 solid;
+	margin: 2px;
+  }
+  
+.methodCallFormatElement
+  {
+	/* obligatory */
+	position: absolute;
+	visibility: hidden;
+		
+	/* optional */
+	padding-left: 4px;
+	color: darkBlue;
+	background-color: #f9f9f9;
+	border: 1px #a9a9a9 solid;
+	margin: 2px;
+  }
+	
+.element 
+  {
+	/* obligatory */
+	position: absolute;
+	visibility: hidden;
+		
+	/* optional */
+	color: #000000;
+	padding-left: 13px;
+	background-color: #e0e0e0;
+	border: 1px #a9a9a9 solid;
+	margin: 2px;
+  }
+
+.element a 
+  {
+	text-decoration: none;
+	color: #000000;
+  }
+	
+.element a:hover 
+  {
+	color: #0000ff;
+  }

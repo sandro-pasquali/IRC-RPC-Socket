@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<functions>
+   <func name="getUserKey">
+      <parameters>
+         <param key="username" />
+      </parameters>
+      <code>
+         <![CDATA[
+			
+             if(isset($_slot) && isset($username) && $System->Socket->clients[$_slot]['level'] == 0)
+               {
+	    	     $System->Socket->clients[$_slot]['username'] = $username;
+				 
+                 /*
+				  * send challenge as RPC packet
+				  */
+		         $challenge = array('challenge',array($System->Socket->getChallenge($_slot)));
+		         $System->Socket->sendData($_slot,XMLRPC_methodResponse($challenge)); 			   
+               }  
+             else 
+               {
+                 return(false);
+               } 
+            
+             ]]>
+      </code>
+   </func>
+   <func name="checkPassword">
+      <parameters>
+         <param key="challenge" />
+      </parameters>
+      <code>
+         <![CDATA[
+
+             if(isset($_slot) && isset($challenge) && $System->Socket->clients[$_slot]['level'] == 0)
+               {
+			     $q = "SELECT password,site_skin from user_accounts 
+				       WHERE username = '".$System->Socket->clients[$_slot]['username']."'";
+						   
+                 $result = mysql_query($q,$System->Dbase->readID);
+
+				 /*
+				  * is there a password for this username?
+				  */
+                 if(mysql_num_rows($result) > 0) 
+				   {
+				     /*
+					  * password will be $creds[0] 
+					  */
+				     $creds = mysql_fetch_array($result);
+
+                     if(sha1($System->Socket->getChallenge($_slot).$creds[0]) == $challenge)
+                       {
+					     /*
+						  * all good; log in user (slot,userlevel,lifespan,skin)
+						  */
+					     $System->Socket->loginUser($_slot,1,"session",$creds[1]);
+                         
+                         /*
+						  * attach methodcall name 
+						  */
+                         $aResp = array('authenticate',array('authOK'));
+                         
+                         /*
+						  * send response 
+						  */
+
+                         return($System->Socket->sendData($_slot,XMLRPC_methodResponse($aResp)));
+                       }
+                     mysql_free_result($result);
+                   }
+                 /* if no parameters set, or authentication fails
+                  * send bad login.  
+                  */
+                 $aResp = array('authenticate',array('authFAIL'));
+                 return($System->Socket->sendData($_slot,XMLRPC_methodResponse($aResp)));      
+               }
+             else 
+               {
+                 return(false);
+               } 
+            
+             ]]>
+      </code>
+   </func>
+</functions>
+
