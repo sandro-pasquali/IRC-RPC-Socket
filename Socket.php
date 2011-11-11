@@ -18,8 +18,8 @@ class Socket extends Assembly
      */
 	function __construct(	$authWindow=300,
 	                		$sessWindow=3600,
-                    		$genPath="/usr/local/apache/htdocs/sandro/sockets/generatedFiles/",
-							$methodsDir="/usr/local/apache/htdocs/sandro/sockets/rpcMethods/"
+                    		$genPath="/sockets/generatedFiles/",
+							$methodsDir="/sockets/rpcMethods/"
 				   		)
 	  {
 		// lifespan settings
@@ -34,7 +34,7 @@ class Socket extends Assembly
 		 */
 		$this->serverAccessCredentials = array
 		  (
-		    "admin" => "wh1t3m0f0"
+		    "admin" => "adminPass"
 		  );
 	  
 		// stores references to all dynamically generated methods (loadRPCMethods())
