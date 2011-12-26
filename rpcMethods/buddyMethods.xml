@@ -57,7 +57,7 @@
 		    * now get users buddy list
 			*/
 		   $q = "SELECT t2.username
-                 FROM dc_datebook AS t1, user_misc AS t2
+                 FROM DB_datebook AS t1, user_misc AS t2
                  WHERE (t2.user_id = t1.buddy_id) 
 				 AND t1.user_id = $uID 
 				 LIMIT 0,50";
@@ -74,7 +74,7 @@
 		     {
 			   /* used to determine which room any one user is in.
 			    * will create an array that allows quick lookup
-				* for any username, such as [nataxia] => '#triviaroom1'
+				* for any username, such as [sandro] => '#triviaroom1'
 				*/
 			   $userIndex = array();
 			   
@@ -220,7 +220,7 @@
 			    * now check if buddy is already on list
 				*/
 			   $q = "SELECT user_id
-			         FROM dc_datebook
+			         FROM DB_datebook
 					 WHERE buddy_id = '$buddyID'
 					 AND user_id = '$userID'";
 				
@@ -237,7 +237,7 @@
 				    * get buddy gender
 					*/
 				   $q = "SELECT user_gender
-				         FROM dc_searchprefs 
+				         FROM DB_searchprefs 
 						 WHERE user_id = '$buddyID'";
 						 
 				   $getGender = mysql_query($q,$System->Dbase->readID);
@@ -251,7 +251,7 @@
                        /*
 					    * update buddy list
 						*/
-					   $q = "INSERT INTO dc_datebook (user_id, buddy_id, buddy_gender) 
+					   $q = "INSERT INTO DB_datebook (user_id, buddy_id, buddy_gender) 
 					         VALUES ('$userID','$buddyID','".$gender[0]."')";
 							 
 				       $addBuddy = mysql_query($q,$System->Dbase->writeID);
@@ -309,7 +309,7 @@
 			    * now check if buddy exists
 				*/
 			   $q = "SELECT user_id
-			         FROM dc_datebook
+			         FROM DB_datebook
 					 WHERE buddy_id = '$buddyID'
 					 AND user_id = '$userID'";
 				
@@ -325,7 +325,7 @@
                    /*
 				    * update buddy list
 					*/
-				   $q = "DELETE FROM dc_datebook 
+				   $q = "DELETE FROM DB_datebook 
 					     WHERE user_id='$userID' AND buddy_id = '$buddyID'";
 							 
 				   $removeBuddy = mysql_query($q,$System->Dbase->writeID);

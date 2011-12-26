@@ -140,7 +140,7 @@
 			        *
 			        * network content subscription page, sent as
 				    * url with username, ie:
-				    * http://www.datecam.com/signup.php?username=nataxia
+				    * http://path/to/signup.php?username=someusername
 				    */
 			       $chans[$cnt]['signupPage'] = '';
 			   
@@ -148,7 +148,7 @@
 			        *
 			        * network content REsubscription page, sent as
 				    * url with username, ie:
-				    * http://www.datecam.com/resignup.php?username=nataxia
+				    * http://path/to/resignup.php?username=someusername
 			 	    */
 			       $chans[$cnt]['rebillPage'] = '';
 			   
@@ -173,7 +173,7 @@
 			       /* networkLogo
 			        *
 			        * url for graphic of network content logo, ie:
-				    * http://www.datecam.com/logos/channelLogo.jpg
+				    * http://path/to/logos/channelLogo.jpg
 				    */
 			       $chans[$cnt]['networkLogo'] = '';
 			   

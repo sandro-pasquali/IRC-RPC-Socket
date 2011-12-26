@@ -43,7 +43,7 @@
 		   
 	       // now get a buddy list array
 		   $q = "select t2.username
-                 from dc_datebook as t1, user_misc as t2
+                 from DB_datebook as t1, user_misc as t2
                  where (t2.user_id = t1.buddy_id) and t1.user_id = $uID";
  
 		   $result = mysql_query($q);
